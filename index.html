@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UCSP Long Quiz Reviewer</title>
+<style>
+:root{
+  --bg:#07111f; --panel:#0d1b2d; --panel2:#12253b; --text:#eef7ff; --muted:#9db2c8;
+  --accent:#2ec4ff; --accent2:#7c6cff; --ok:#2bd576; --bad:#ff667d; --warn:#ffc857;
+  --border:rgba(255,255,255,.10);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; color:var(--text);
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 10% 15%, rgba(46,196,255,.12), transparent 28%),
+    radial-gradient(circle at 90% 10%, rgba(124,108,255,.12), transparent 24%),
+    var(--bg);
+}
+.wrap{width:min(980px,94%);margin:0 auto;padding:28px 0 46px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:900;color:#04101b}
+.brand b{display:block;font-size:14px;letter-spacing:.04em}
+.brand span{color:var(--muted);font-size:12px}
+.badge{border:1px solid var(--border);background:rgba(255,255,255,.04);padding:8px 12px;border-radius:999px;color:var(--muted);font-size:12px}
+.card{background:rgba(13,27,45,.92);border:1px solid var(--border);border-radius:24px;padding:26px;box-shadow:0 20px 70px rgba(0,0,0,.28)}
+.hero{text-align:center;padding:12px 4px 4px}
+.hero h1{font-size:clamp(30px,6vw,58px);line-height:1.02;margin:4px 0 10px;letter-spacing:-.04em}
+.hero p{color:var(--muted);max-width:720px;margin:0 auto 20px;line-height:1.6}
+.inspire{
+  margin:20px auto 22px;max-width:760px;padding:18px 20px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(46,196,255,.11),rgba(124,108,255,.10));
+  border:1px solid rgba(46,196,255,.24);line-height:1.6
+}
+.inspire strong{color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;margin:0 auto}
+.field{text-align:left}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}
+input,select{width:100%;background:#091827;border:1px solid var(--border);color:var(--text);padding:13px 14px;border-radius:13px;outline:none;font-size:15px}
+input:focus,select:focus{border-color:rgba(46,196,255,.6);box-shadow:0 0 0 3px rgba(46,196,255,.08)}
+.btn{
+  border:0;border-radius:14px;padding:14px 18px;font-size:15px;font-weight:800;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),#67ddff);color:#03111a;transition:.15s transform,.15s opacity
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.secondary{background:#172c43;color:var(--text);border:1px solid var(--border)}
+.start-actions{max-width:760px;margin:16px auto 0;display:flex;gap:12px;align-items:center}
+.start-actions .btn{flex:1}
+.small-note{font-size:12px;color:var(--muted);margin-top:14px}
+.hidden{display:none!important}
+
+.quiz-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.quiz-head h2{margin:0 0 6px;font-size:20px}
+.meta{color:var(--muted);font-size:13px}
+.progress-track{height:9px;border-radius:999px;background:#081624;overflow:hidden;margin:16px 0 22px}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s}
+.module-pill{display:inline-flex;padding:7px 10px;border-radius:999px;background:rgba(46,196,255,.10);border:1px solid rgba(46,196,255,.2);color:#aeeeff;font-size:12px;font-weight:800;margin-bottom:14px}
+.question{font-size:clamp(20px,3vw,28px);line-height:1.35;font-weight:800;margin:0 0 18px}
+.options{display:grid;gap:11px}
+.option{
+  display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:15px;border:1px solid var(--border);
+  background:#0a1929;cursor:pointer;transition:.12s;border-color:.12s,background .12s
+}
+.option:hover{border-color:rgba(46,196,255,.38);background:#0c1f32}
+.option input{width:auto;margin-top:3px}
+.option .letter{width:28px;height:28px;flex:0 0 28px;border-radius:9px;display:grid;place-items:center;background:#15283d;color:#bcd2e8;font-weight:900}
+.option.correct{border-color:rgba(43,213,118,.65);background:rgba(43,213,118,.10)}
+.option.wrong{border-color:rgba(255,102,125,.62);background:rgba(255,102,125,.10)}
+.feedback{margin-top:16px;padding:16px 18px;border-radius:16px;border:1px solid var(--border);line-height:1.55}
+.feedback.good{background:rgba(43,213,118,.09);border-color:rgba(43,213,118,.34)}
+.feedback.bad{background:rgba(255,102,125,.08);border-color:rgba(255,102,125,.34)}
+.feedback-title{font-weight:900;margin-bottom:5px}
+.explain{color:#c5d7e8}
+.quiz-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.stat{background:#0a1929;border:1px solid var(--border);padding:16px;border-radius:16px;text-align:center}
+.stat b{display:block;font-size:28px}
+.stat span{color:var(--muted);font-size:12px}
+.breakdown{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}
+.break-row{display:flex;justify-content:space-between;background:#0a1929;border:1px solid var(--border);padding:11px 13px;border-radius:12px;font-size:13px}
+.result-message{text-align:center;padding:10px 0 2px}
+.result-message h2{font-size:32px;margin:0 0 8px}
+.result-message p{color:var(--muted);line-height:1.55}
+.review-list{display:grid;gap:12px;margin-top:18px}
+.review-item{background:#0a1929;border:1px solid var(--border);border-radius:16px;padding:15px}
+.review-item b{display:block;margin-bottom:7px}
+.review-item .ans{font-size:13px;color:#b8cbe0;margin-top:5px}
+.footer{text-align:center;color:#607991;font-size:11px;margin-top:18px}
+@media(max-width:700px){
+ .grid,.breakdown{grid-template-columns:1fr}
+ .stats-grid{grid-template-columns:1fr 1fr}
+ .card{padding:18px;border-radius:20px}
+ .start-actions{flex-direction:column}
+ .start-actions .btn{width:100%}
+ .quiz-head{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">U</div>
+      <div><b>UCSP REVIEWER</b><span>South East – Asia Institute of Trade and Technology</span></div>
+    </div>
+    <div class="badge">ONLINE REVIEWER</div>
+  </div>
+
+  <section id="startScreen" class="card">
+    <div class="hero">
+      <div class="module-pill">MODULES 1–10 • 120 ITEMS • ONLINE</div>
+      <h1>Long Quiz Reviewer</h1>
+      <p>Answer one question at a time. After each answer, you will immediately see the correct answer and a simple explanation so every mistake becomes a learning opportunity.</p>
+      <div class="inspire">
+        <strong>Before you begin:</strong><br>
+        “Every question you answer is one step closer to mastery. Do not be afraid of mistakes—use them to learn, improve, and become better. Believe in yourself, take your time, and do your best. You’ve got this!” 💪📚
+      </div>
+      <div class="grid">
+        <div class="field"><label>Student Name</label><input id="studentName" placeholder="Enter your full name"></div>
+        <div class="field"><label>Section</label><input id="studentSection" placeholder="Example: Grade 12 – A"></div>
+      </div>
+      <div class="start-actions">
+        <button class="btn" onclick="startQuiz()">START 120-ITEM REVIEWER</button>
+      </div>
+      <div class="small-note">No timer. Immediate answer + explanation after every item. Your score and mistake review will appear at the end. This GitHub Pages version does not require the teacher's laptop to stay on.</div>
+    </div>
+  </section>
+
+  <section id="quizScreen" class="card hidden">
+    <div class="quiz-head">
+      <div><h2 id="studentDisplay">Student</h2><div class="meta" id="counter">Question 1 of 120</div></div>
+      <button class="btn secondary" onclick="confirmRestart()">Restart</button>
+    </div>
+    <div class="progress-track"><div id="progress" class="progress-bar"></div></div>
+    <div id="modulePill" class="module-pill">MODULE 1</div>
+    <div id="questionText" class="question"></div>
+    <div id="options" class="options"></div>
+    <div id="feedback" class="feedback hidden"></div>
+    <div class="quiz-actions">
+      <button id="checkBtn" class="btn" onclick="checkAnswer()">CHECK ANSWER</button>
+      <button id="nextBtn" class="btn hidden" onclick="nextQuestion()">NEXT QUESTION →</button>
+    </div>
+  </section>
+
+  <section id="resultScreen" class="card hidden">
+    <div class="result-message">
+      <div class="module-pill">REVIEW COMPLETE</div>
+      <h2 id="resultTitle">Great work!</h2>
+      <p id="resultSub"></p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat"><b id="scoreStat">0</b><span>Correct</span></div>
+      <div class="stat"><b id="wrongStat">0</b><span>Incorrect</span></div>
+      <div class="stat"><b id="percentStat">0%</b><span>Percentage</span></div>
+      <div class="stat"><b>120</b><span>Total Items</span></div>
+    </div>
+    <h3>Module Breakdown</h3>
+    <div id="breakdown" class="breakdown"></div>
+    <div class="start-actions">
+      <button class="btn" onclick="restartQuiz()">TRY AGAIN</button>
+      <button class="btn secondary" onclick="toggleMistakes()">REVIEW MY MISTAKES</button>
+    </div>
+    <div id="mistakePanel" class="hidden">
+      <h3 style="margin-top:24px">Items to Review</h3>
+      <div id="reviewList" class="review-list"></div>
+    </div>
+  </section>
+
+  <div class="footer">UCSP Long Quiz Reviewer • GitHub Pages Edition • Reviewer content based on Modules 1–10</div>
+</div>
+<script src="questions-m1.js"></script>
+<script src="questions-m2.js"></script>
+<script src="questions-m3.js"></script>
+<script src="questions-m4.js"></script>
+<script src="questions-m5.js"></script>
+<script src="questions-m6.js"></script>
+<script src="questions-m7.js"></script>
+<script src="questions-m8.js"></script>
+<script src="questions-m9.js"></script>
+<script src="questions-m10.js"></script>
+<script>
+let quiz=[], idx=0, score=0, selected=null, answered=false, mistakes=[], moduleStats={};
+let student={name:"",section:""};
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function startQuiz(){
+  const name=document.getElementById('studentName').value.trim();
+  const section=document.getElementById('studentSection').value.trim();
+  if(!name || !section){ alert('Please enter your name and section first.'); return; }
+  student={name,section};
+  // Keep all 120 items but shuffle their order.
+  quiz=shuffle([...window.UCSP_QUESTIONS]);
+  idx=0; score=0; selected=null; answered=false; mistakes=[]; moduleStats={};
+  for(let m=1;m<=10;m++) moduleStats[m]={correct:0,total:0};
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  document.getElementById('studentDisplay').textContent=student.name+' • '+student.section;
+  renderQuestion();
+}
+function renderQuestion(){
+  const q=quiz[idx];
+  selected=null; answered=false;
+  document.getElementById('counter').textContent=`Question ${idx+1} of ${quiz.length}`;
+  document.getElementById('progress').style.width=`${(idx/quiz.length)*100}%`;
+  document.getElementById('modulePill').textContent=`MODULE ${q.module}`;
+  document.getElementById('questionText').textContent=q.question;
+  const box=document.getElementById('options'); box.innerHTML='';
+  q.options.forEach((opt,i)=>{
+    const div=document.createElement('div');
+    div.className='option'; div.dataset.index=i;
+    div.innerHTML=`<div class="letter">${String.fromCharCode(65+i)}</div><div style="flex:1">${escapeHtml(opt)}</div>`;
+    div.onclick=()=>selectOption(i);
+    box.appendChild(div);
+  });
+  document.getElementById('feedback').className='feedback hidden';
+  document.getElementById('feedback').innerHTML='';
+  document.getElementById('checkBtn').classList.remove('hidden');
+  document.getElementById('checkBtn').disabled=false;
+  document.getElementById('nextBtn').classList.add('hidden');
+}
+function selectOption(i){
+  if(answered) return;
+  selected=i;
+  document.querySelectorAll('.option').forEach((el,n)=>{
+    el.style.borderColor = n===i ? 'rgba(46,196,255,.72)' : '';
+    el.style.background = n===i ? 'rgba(46,196,255,.08)' : '';
+  });
+}
+function checkAnswer(){
+  if(selected===null){ alert('Choose an answer first.'); return; }
+  if(answered) return;
+  answered=true;
+  const q=quiz[idx], correct=selected===q.answer;
+  moduleStats[q.module].total++;
+  if(correct){ score++; moduleStats[q.module].correct++; }
+  else mistakes.push({q, chosen:selected});
+  document.querySelectorAll('.option').forEach((el,n)=>{
+    el.style.borderColor=''; el.style.background='';
+    if(n===q.answer) el.classList.add('correct');
+    if(n===selected && n!==q.answer) el.classList.add('wrong');
+  });
+  const f=document.getElementById('feedback');
+  f.className='feedback '+(correct?'good':'bad');
+  const correctText=`${String.fromCharCode(65+q.answer)}. ${q.options[q.answer]}`;
+  f.innerHTML=`<div class="feedback-title">${correct?'✅ Correct!':'❌ Not quite.'}</div>
+    <div><strong>Correct answer:</strong> ${escapeHtml(correctText)}</div>
+    <div class="explain"><strong>Explanation:</strong> ${escapeHtml(q.explanation)}</div>`;
+  document.getElementById('checkBtn').classList.add('hidden');
+  const next=document.getElementById('nextBtn');
+  next.textContent = idx===quiz.length-1 ? 'VIEW RESULTS →' : 'NEXT QUESTION →';
+  next.classList.remove('hidden');
+  document.getElementById('progress').style.width=`${((idx+1)/quiz.length)*100}%`;
+}
+function nextQuestion(){
+  if(!answered) return;
+  if(idx<quiz.length-1){ idx++; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else finishQuiz();
+}
+function finishQuiz(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.remove('hidden');
+  const pct=Math.round((score/quiz.length)*100);
+  const wrong=quiz.length-score;
+  document.getElementById('scoreStat').textContent=score;
+  document.getElementById('wrongStat').textContent=wrong;
+  document.getElementById('percentStat').textContent=pct+'%';
+  let title='Keep reviewing—you are improving!';
+  if(pct>=90) title='Outstanding review performance! 🌟';
+  else if(pct>=80) title='Great job! You are almost exam-ready. 💪';
+  else if(pct>=70) title='Good progress—review the weak modules. 📚';
+  document.getElementById('resultTitle').textContent=title;
+  document.getElementById('resultSub').textContent=`${student.name}, you scored ${score} out of ${quiz.length}. Use the explanations and your mistake list to strengthen the topics that need more practice.`;
+  const b=document.getElementById('breakdown'); b.innerHTML='';
+  for(let m=1;m<=10;m++){
+    const s=moduleStats[m];
+    b.innerHTML += `<div class="break-row"><span>Module ${m}</span><strong>${s.correct} / ${s.total}</strong></div>`;
+  }
+  renderMistakes();
+  saveResult(pct);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function renderMistakes(){
+  const list=document.getElementById('reviewList'); list.innerHTML='';
+  if(mistakes.length===0){
+    list.innerHTML='<div class="review-item">Perfect score — no mistakes to review. Excellent work! 🎉</div>';
+    return;
+  }
+  mistakes.forEach((m,i)=>{
+    const q=m.q;
+    const chosen=`${String.fromCharCode(65+m.chosen)}. ${q.options[m.chosen]}`;
+    const correct=`${String.fromCharCode(65+q.answer)}. ${q.options[q.answer]}`;
+    const div=document.createElement('div'); div.className='review-item';
+    div.innerHTML=`<b>${i+1}. [Module ${q.module}] ${escapeHtml(q.question)}</b>
+      <div class="ans">Your answer: ${escapeHtml(chosen)}</div>
+      <div class="ans">Correct answer: <strong>${escapeHtml(correct)}</strong></div>
+      <div class="ans">Explanation: ${escapeHtml(q.explanation)}</div>`;
+    list.appendChild(div);
+  });
+}
+function toggleMistakes(){ document.getElementById('mistakePanel').classList.toggle('hidden'); }
+function saveResult(pct){
+  const record={
+    timestamp:new Date().toISOString(),
+    name:student.name,
+    section:student.section,
+    score:score,
+    total:quiz.length,
+    percentage:pct,
+    incorrect:quiz.length-score
+  };
+  try{
+    const history=JSON.parse(localStorage.getItem('ucspReviewerHistory')||'[]');
+    history.unshift(record);
+    localStorage.setItem('ucspReviewerHistory',JSON.stringify(history.slice(0,20)));
+  }catch(e){}
+}
+function restartQuiz(){
+  document.getElementById('resultScreen').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+  document.getElementById('mistakePanel').classList.add('hidden');
+}
+function confirmRestart(){
+  if(confirm('Restart the reviewer? Your current progress will be lost.')) restartQuiz();
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+</script>
+</body>
+</html>
