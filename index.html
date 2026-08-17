@@ -89,6 +89,10 @@ input:focus,select:focus{border-color:rgba(46,196,255,.6);box-shadow:0 0 0 3px r
 .review-item{background:#0a1929;border:1px solid var(--border);border-radius:16px;padding:15px}
 .review-item b{display:block;margin-bottom:7px}
 .review-item .ans{font-size:13px;color:#b8cbe0;margin-top:5px}
+.submit-status{margin:16px 0 4px;padding:13px 15px;border-radius:14px;border:1px solid var(--border);font-size:13px;text-align:center;background:#0a1929;color:var(--muted)}
+.submit-status.sending{border-color:rgba(46,196,255,.35);color:#bdefff}
+.submit-status.sent{border-color:rgba(43,213,118,.40);background:rgba(43,213,118,.08);color:#bdf5d4}
+.submit-status.fail{border-color:rgba(255,102,125,.40);background:rgba(255,102,125,.08);color:#ffc0cb}
 .footer{text-align:center;color:#607991;font-size:11px;margin-top:18px}
 @media(max-width:700px){
  .grid,.breakdown{grid-template-columns:1fr}
@@ -126,7 +130,7 @@ input:focus,select:focus{border-color:rgba(46,196,255,.6);box-shadow:0 0 0 3px r
       <div class="start-actions">
         <button class="btn" onclick="startQuiz()">START 120-ITEM REVIEWER</button>
       </div>
-      <div class="small-note">No timer. Immediate answer + explanation after every item. Your score and mistake review will appear at the end. This GitHub Pages version does not require the teacher's laptop to stay on.</div>
+      <div class="small-note">No timer. Immediate answer + explanation after every item. Your score and mistake review will appear at the end, and your completed result will be sent automatically to the teacher record.</div>
     </div>
   </section>
 
@@ -160,6 +164,7 @@ input:focus,select:focus{border-color:rgba(46,196,255,.6);box-shadow:0 0 0 3px r
     </div>
     <h3>Module Breakdown</h3>
     <div id="breakdown" class="breakdown"></div>
+    <div id="submitStatus" class="submit-status sending">Your result will be submitted automatically when you finish.</div>
     <div class="start-actions">
       <button class="btn" onclick="restartQuiz()">TRY AGAIN</button>
       <button class="btn secondary" onclick="toggleMistakes()">REVIEW MY MISTAKES</button>
@@ -185,6 +190,8 @@ input:focus,select:focus{border-color:rgba(46,196,255,.6);box-shadow:0 0 0 3px r
 <script>
 let quiz=[], idx=0, score=0, selected=null, answered=false, mistakes=[], moduleStats={};
 let student={name:"",section:""};
+let attemptId="";
+const RESULT_ENDPOINT="https://script.google.com/macros/s/AKfycbyn6gsw1z_LmhH62TyXiQ_W0PPJMoWs5KCbUD2Mxi8JBffhSRX_eCh8Ss72xgFbljBx/exec";
 
 function shuffle(arr){
   for(let i=arr.length-1;i>0;i--){
@@ -198,7 +205,7 @@ function startQuiz(){
   const section=document.getElementById('studentSection').value.trim();
   if(!name || !section){ alert('Please enter your name and section first.'); return; }
   student={name,section};
-  // Keep all 120 items but shuffle their order.
+  attemptId=(crypto.randomUUID ? crypto.randomUUID() : ('attempt-'+Date.now()+'-'+Math.random().toString(16).slice(2)));
   quiz=shuffle([...window.UCSP_QUESTIONS]);
   idx=0; score=0; selected=null; answered=false; mistakes=[]; moduleStats={};
   for(let m=1;m<=10;m++) moduleStats[m]={correct:0,total:0};
@@ -309,21 +316,42 @@ function renderMistakes(){
   });
 }
 function toggleMistakes(){ document.getElementById('mistakePanel').classList.toggle('hidden'); }
-function saveResult(pct){
+async function saveResult(pct){
+  const status=document.getElementById('submitStatus');
+  status.className='submit-status sending';
+  status.textContent='⏳ Submitting your result to the teacher record...';
+
   const record={
+    attemptId:attemptId,
     timestamp:new Date().toISOString(),
     name:student.name,
     section:student.section,
     score:score,
     total:quiz.length,
     percentage:pct,
-    incorrect:quiz.length-score
+    incorrect:quiz.length-score,
+    moduleStats:moduleStats
   };
+
   try{
     const history=JSON.parse(localStorage.getItem('ucspReviewerHistory')||'[]');
     history.unshift(record);
     localStorage.setItem('ucspReviewerHistory',JSON.stringify(history.slice(0,20)));
   }catch(e){}
+
+  try{
+    await fetch(RESULT_ENDPOINT,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(record)
+    });
+    status.className='submit-status sent';
+    status.textContent='✅ Result submitted for recording. You may now review your mistakes.';
+  }catch(e){
+    status.className='submit-status fail';
+    status.innerHTML='⚠️ Result could not be submitted. Check your internet connection, then <button class="btn secondary" style="padding:7px 10px;margin-left:6px" onclick="saveResult('+pct+')">Retry</button>';
+  }
 }
 function restartQuiz(){
   document.getElementById('resultScreen').classList.add('hidden');
